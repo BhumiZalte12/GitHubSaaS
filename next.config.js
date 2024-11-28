@@ -5,7 +5,8 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve('src'), // Update alias for '@'
+      '@': path.resolve('src'),
+      reactStrictMode: true, // Update alias for '@'
     };
     return config;
   },

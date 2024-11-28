@@ -1,6 +1,6 @@
 import { auth , clerkClient, EmailAddress } from "@clerk/nextjs/server";
 import { notFound ,redirect } from "next/navigation";
-import React from "react";
+import React from 'react'
 import { db } from '@/server/db'
 
 
@@ -40,7 +40,7 @@ await db.user.upsert({
     
 
 });
-return redirect('./dashboard')
+return redirect('/dashboard')
    
 };
 
