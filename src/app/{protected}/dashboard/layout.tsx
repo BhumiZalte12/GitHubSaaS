@@ -1,37 +1,32 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { UserButton } from "@clerk/nextjs";
-import React from "react";
+'use client'
 
-type Props = {
-  children: React.ReactNode;
-};
-
-const SidebarLayout = ({ children }: Props) => {
+// components/Layout.tsx
+import classNames from "classnames";
+import React, { PropsWithChildren, useState } from "react";
+import { Bars3Icon } from "@heroicons/react/24/outline";
+const Layout = (props: PropsWithChildren) => {
+  const [collapsed, setSidebarCollapsed] = useState(false);
   return (
-    <SidebarProvider>
-      <main className="w-full m-2">
-        {/* Top Bar */}
-        <div className="flex items-center gap-2 border-sidebar-border bg-sidebar border shadow rounded-md p-2 px-4">
-          {/* Add a Search Bar or other top-bar content */}
-          {/* <SearchBar /> */}
-          <div className="ml-auto">
-            <UserButton />
-          </div>
-        </div>
-
-        {/* Main Content Area with spacing */}
-        <div className="border-sidebar-border bg-sidebar border shadow rounded-md overflow-y-scroll h-[calc(100vh-6rem)] px-4 mt-4">
-          {children ? (
-            children
-          ) : (
-            <div className="text-center text-gray-500">
-              No content provided for this layout.
-            </div>
-          )}
-        </div>R
-      </main>
-    </SidebarProvider>
+    <div
+      className={classNames({
+        // 👇 use grid layout
+        "grid min-h-screen": true,
+        // 👇 toggle the width of the sidebar depending on the state
+        "grid-cols-sidebar": !collapsed,
+        "grid-cols-sidebar-collapsed": collapsed,
+        // 👇 transition animation classes
+        "transition-[grid-template-columns] duration-300 ease-in-out": true,
+      })}
+    >
+      {/* sidebar */}
+      <div className="bg-indigo-700 text-white">
+        <button onClick={() => setSidebarCollapsed((prev) => !prev)}>
+          <Bars3Icon className="w-10 h-10" />
+        </button>
+      </div>
+      {/* content */}
+      <div className=""> {props.children}</div>
+    </div>
   );
 };
-
-export default SidebarLayout;
+export default Layout;

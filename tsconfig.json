@@ -8,7 +8,11 @@
     "resolveJsonModule": true,
     "moduleDetection": "force",
     "isolatedModules": true,
+    "moduleResolution": "node",
     "typeRoots": ["node_modules/@types"],
+
+    
+    
 
     /* Strictness */
     "strict": true,
@@ -19,7 +23,7 @@
     "lib": ["dom", "dom.iterable", "ES2022"],
     "noEmit": true,
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+   
     "jsx": "preserve",
     "plugins": [{ "name": "next" }],
     "incremental": true,
@@ -41,3 +45,4 @@
   ],
   "exclude": ["node_modules"]
 }
+

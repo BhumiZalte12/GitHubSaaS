@@ -1,11 +1,24 @@
 import { type Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
+/** @type {import('tailwindcss').Config} */
+
 
 export default {
     darkMode: ["class"],
-    content: ["./src/**/*.tsx"],
+    content: ["./src/**/*.tsx",
+	
+		"./app/**/*.{js,ts,jsx,tsx}",
+		"./pages/**/*.{js,ts,jsx,tsx}",
+		"./components/**/*.{js,ts,jsx,tsx}",
+	  ],
   theme: {
   	extend: {
+		
+			gridTemplateColumns: {
+			  sidebar: "300px auto", //for sidebar layout
+			  "sidebar-collapsed": "64px auto", //for collapsed sidebar layout
+			},
+		  
   		fontFamily: {
   			sans: ["var(--font-geist-sans)", ...fontFamily.sans]
   		},
@@ -92,3 +105,4 @@ export default {
   },
   plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+
