@@ -22,26 +22,24 @@ const CreatePage = () => {
             {
                 gitHubUrl: data.repoUrl,
                 name: data.projectName,
+                
                 gitHubToken: data.githubToken,
             },
             {
                 onSuccess: () => {
-                    toast({
-                        title: "Success",
-                        description: "Project created successfully.",
-                        
-                    });
+                    alert("Project created successfully.");
+                    
                     reset();
                 },
                 onError: () => {
-                    toast({
-                        title: "Error",
-                        description: "Failed to create project.",
-                         
-                    });
+                    alert("Failed to create project.");
+                    
                 },
             }
-        );
+        )
+        return true
+
+
     }
 
     return (
@@ -77,7 +75,7 @@ const CreatePage = () => {
                             className="mb-4"
                         />
                         <div className="h-4"></div>
-                        <Button type="submit">Create Project</Button>
+                        <Button type="submit" disabled={createProject.isPending}>Create Project</Button>
                     </form>
                 </div>
             </div>
