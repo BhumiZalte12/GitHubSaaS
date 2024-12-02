@@ -79,7 +79,7 @@ export function AppSidebar() {
                           "flex items-center p-2 rounded-md transition-all",
                           isActive
                             ? "bg-[rgb(0,0,0)] text-white"
-                            : "bg-transparent text-gray-800 hover:bg-[rgb(0,0,0)] hover:text-white"
+                            : "bg-transparent text-gray-800 hover:bg-[rgb(0,0,0)] hover:text-black"
                         )}
                       >
                         <item.icon className="mr-2 text-gray-700" />

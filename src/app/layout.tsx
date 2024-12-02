@@ -3,7 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 import TRPCProvider from "../trpc/Provider";  // Corrected import
 import { ClerkProvider } from "@clerk/nextjs";
-import { Toaster } from "sonner";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "DIONYSUS",
@@ -20,7 +20,7 @@ export default function RootLayout({
         <body>
           {/* Wrap with TRPCProvider here */}
           <TRPCProvider>{children}</TRPCProvider>
-          <Toaster richColors />
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>

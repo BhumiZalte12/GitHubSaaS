@@ -40,7 +40,7 @@ await db.user.upsert({
     
 
 });
-return redirect('/dashboard')
+return redirect('/create')
    
 };
 
