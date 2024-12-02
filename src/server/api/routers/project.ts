@@ -1,14 +1,14 @@
-import { createTRPCRouter } from "../trpc";
-import { protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 export const projectRouter = createTRPCRouter({
-  // Create a project
+  // Create Project
   createProject: protectedProcedure
     .input(
       z.object({
-        name: z.string(),
-        gitHubUrl: z.string().url(), // Validate URL format
+        name: z.string().min(1, "Project name is required"),
+        gitHubUrl: z.string().url("Invalid GitHub URL"),
         gitHubToken: z.string().optional(),
       })
     )
@@ -18,37 +18,45 @@ export const projectRouter = createTRPCRouter({
           data: {
             name: input.name,
             gitHubUrl: input.gitHubUrl,
-            gitHubToken: input.gitHubToken || null, // Optional field
+            gitHubToken: input.gitHubToken || null,
             userToProjects: {
               create: {
-                userId: ctx.user.userId, // Ensure ctx.user.userId is valid
+                userId: ctx.user.userId,
               },
             },
           },
         });
         return project;
       } catch (error) {
-        console.error("Error creating project: ", error);
-        throw new Error("Failed to create project.");
+        console.error("Error creating project:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create project",
+        });
       }
     }),
 
-  // Fetch projects for the current user
+  // Get Projects
   getProjects: protectedProcedure.query(async ({ ctx }) => {
     try {
       return await ctx.db.project.findMany({
         where: {
           userToProjects: {
             some: {
-              userId: ctx.user.userId!,
+              userId: ctx.user.userId,
             },
           },
-          deletedAt: null, // Ensure deleted projects are excluded
+        },
+        orderBy: {
+          createdAt: "desc",
         },
       });
     } catch (error) {
-      console.error("Error fetching projects: ", error);
-      throw new Error("Failed to fetch projects.");
+      console.error("Error fetching projects:", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to fetch projects",
+      });
     }
   }),
 });
