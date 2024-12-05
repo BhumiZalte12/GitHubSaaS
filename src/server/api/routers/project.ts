@@ -59,4 +59,27 @@ export const projectRouter = createTRPCRouter({
       });
     }
   }),
+
+  // Get Commits
+  getCommits: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        return await ctx.db.commit.findMany({
+          where: {
+            projectId: input.projectId,
+          },
+        });
+      } catch (error) {
+        console.error("Error fetching commits:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to fetch commits",
+        });
+      }
+    }),
 });

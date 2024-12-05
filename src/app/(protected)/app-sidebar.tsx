@@ -1,5 +1,5 @@
-"use client";
-
+// AppSidebar.tsx
+'use client'
 import React from "react";
 import {
   SidebarHeader,
@@ -11,8 +11,8 @@ import {
   SidebarMenuButton,
   SidebarMenu,
   useSidebar,
+  Sidebar
 } from "@/components/ui/sidebar";
-import { Sidebar } from "@/components/ui/sidebar";
 import { LayoutDashboard, Bot, Presentation, CreditCard, Plus, Loader2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -22,26 +22,10 @@ import Image from "next/image";
 import useProject from "@/hooks/use-project";
 
 const items = [
-  {
-    title: "Dashboard",
-    url: "/Dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Q&A",
-    url: "/qa",
-    icon: Bot,
-  },
-  {
-    title: "Meetings",
-    url: "/meetings",
-    icon: Presentation,
-  },
-  {
-    title: "Billing",
-    url: "/billing",
-    icon: CreditCard,
-  },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Q&A", url: "/qa", icon: Bot },
+  { title: "Meetings", url: "/meetings", icon: Presentation },
+  { title: "Billing", url: "/billing", icon: CreditCard },
 ];
 
 export function AppSidebar() {
@@ -54,11 +38,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Image src="/logo.png" alt="logo" width={40} height={40} />
-          {open && (
-            <h1 className="text-xl font-bold text-primary/80">
-              Dionysus
-            </h1>
-          )}
+          {open && <h1 className="text-xl font-bold text-primary/80">Dionysus</h1>}
         </div>
       </SidebarHeader>
       <SidebarContent>

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "run-github": "ts-node src/lib/github.ts",
     "build": "next build",
     "check": "next lint && tsc --noEmit",
     "db:generate": "prisma migrate dev",
@@ -22,8 +23,11 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.5.1",
+    "@google/generative-ai": "^0.21.0",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^3.9.1",
+    "@octokit/core": "^6.1.2",
+    "@octokit/webhooks": "^13.4.1",
     "@prisma/client": "^5.22.0",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.2",
@@ -57,6 +61,7 @@
     "@tanstack/react-query": "^5.50.0",
     "@trpc/react-query": "^11.0.0-rc.446",
     "@trpc/server": "^11.0.0-rc.446",
+    "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
@@ -68,6 +73,7 @@
     "lucide-react": "^0.462.0",
     "next": "^15.0.1",
     "next-themes": "^0.4.3",
+    "octokit": "^4.0.2",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
@@ -86,8 +92,9 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/axios": "^0.9.36",
     "@types/eslint": "^8.56.10",
-    "@types/node": "^20.14.10",
+    "@types/node": "^20.17.9",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^8.1.0",
@@ -97,9 +104,11 @@
     "postcss": "^8.4.39",
     "prettier": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
-    "prisma": "^6.0.0",
+    "prisma": "^6.0.1",
     "tailwindcss": "^3.4.3",
-    "typescript": "^5.5.3"
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.7.2"
   },
   "ct3aMetadata": {
     "initVersion": "7.38.1"
