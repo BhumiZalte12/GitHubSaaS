@@ -1,6 +1,7 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
+import { pollCommits } from "@/lib/github";
 
 export const projectRouter = createTRPCRouter({
   // Create Project
@@ -21,11 +22,12 @@ export const projectRouter = createTRPCRouter({
             gitHubToken: input.gitHubToken || null,
             userToProjects: {
               create: {
-                userId: ctx.user.userId,
+                userId: ctx.user.userId!,
               },
             },
           },
         });
+        await pollCommits(project.id)
         return project;
       } catch (error) {
         console.error("Error creating project:", error);
@@ -38,7 +40,7 @@ export const projectRouter = createTRPCRouter({
 
   // Get Projects
   getProjects: protectedProcedure.query(async ({ ctx }) => {
-    try {
+   
       return await ctx.db.project.findMany({
         where: {
           userToProjects: {
@@ -46,18 +48,14 @@ export const projectRouter = createTRPCRouter({
               userId: ctx.user.userId,
             },
           },
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
+        
+       
+         
+        }
       });
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to fetch projects",
-      });
-    }
+    
+    
+    
   }),
 
   // Get Commits
@@ -71,7 +69,7 @@ export const projectRouter = createTRPCRouter({
       try {
         return await ctx.db.commit.findMany({
           where: {
-            projectId: input.projectId,
+            projectId: input.projectId
           },
         });
       } catch (error) {
@@ -83,3 +81,4 @@ export const projectRouter = createTRPCRouter({
       }
     }),
 });
+
