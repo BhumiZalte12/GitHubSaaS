@@ -1,15 +1,18 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Document } from "@langchain/core/documents";
 
 // Initialize the Google Generative AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-// Fetch the generative model
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
+// Function to fetch the generative model once
+const getGenerativeModel = () => genAI.getGenerativeModel({
+  model: "gemini-1.5-flash", // You can switch models depending on your need
 });
 
 // Function to summarize commits using generative AI
-export const aiSummariseCommit= async (diff: string): Promise<string> => {
+export const aiSummariseCommit = async (diff: string): Promise<string> => {
+  const model = getGenerativeModel();
+
   const prompt = `
     You are an expert programmer, and you are trying to summarize a git diff.
     Reminders about the git diff format:
@@ -26,28 +29,53 @@ export const aiSummariseCommit= async (diff: string): Promise<string> => {
     A line starting with '-' means that line was deleted.
     A line that starts with neither '+' nor '-' is code given for context and better understanding.
     It is not part of the diff.
-    [...]
-    EXAMPLE SUMMARY COMMENTS:
-    '''
-    * Raised the amount of returned recordings from '10' to '100' [packages/server/recordings_api.ts], [packages/server/constants.ts]
-    * Fixed a typo in the GitHub action name [.github/workflows/gpt-commit-summarizer.yml]
-    * Moved the 'octokit' initialization to a separate file [src/octokit.ts], [src/index.ts]
-    * Added an OpenAI API for completions [packages/utils/apis/openai.ts]
-    * Lowered numeric tolerance for test files
-    '''
-    Most commits will have fewer comments than this example list.
-    The last comment does not include the file names,
-    because there were more than two relevant files in the hypothetical commit.
-    Do not include parts of the example in your summary.
-    It is given only as an example of appropriate comments.
-    
+    [...your example summary...]
     Summarize the following git diff:\n\n${diff}
   `;
 
-  const response = await model.generateContent([prompt]);
-  return response.response.text();
+  try {
+    const response = await model.generateContent([prompt]);
+    return response.response.text();
+  } catch (error) {
+    console.error("Error summarizing commit:", error);
+    return "Error summarizing commit";
+  }
 };
 
+// Function to summarize code with a specific context
+export async function summariseCode(doc: Document) {
+  try {
+    const code = doc.pageContent.slice(0, 10000); // Limit code length
+    const model = getGenerativeModel();
 
+    const response = await model.generateContent([
+      `You are an intelligent senior software engineer who specializes in onboarding junior software engineers onto projects.
+      You are onboarding a junior software engineer and explaining to them the purpose of the ${doc.metadata.source} file.
+      Here is the code:
+      ---
+      ${code}
+      ---
+      Give a summary no more than 100 words of the code above.`,
+    ]);
 
+    return response.response.text();
+  } catch (error) {
+    console.error("Error summarizing code:", error);
+    return "";
+  }
+}
 
+// Function to generate embeddings for a summary
+export async function generateEmbedding(summary: string) {
+  const model = genAI.getGenerativeModel({
+    model: "text-embedding-004",
+  });
+
+  try {
+    const result = await model.embedContent(summary);
+    return result.embedding.values;
+  } catch (error) {
+    console.error("Error generating embedding:", error);
+    return [];
+  }
+}
