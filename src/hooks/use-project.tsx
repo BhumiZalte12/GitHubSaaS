@@ -15,19 +15,23 @@ const useProject = () => {
 
   // Fetch project from localStorage or set initial projectId
   useEffect(() => {
+    // If projects are fetched and available
     if (projects && projects.length > 0) {
       const storedProjectId = localStorage.getItem("projectId");
+
+      // If there's a projectId stored in localStorage, use it
       if (storedProjectId) {
         setProjectId(storedProjectId);
       } else {
+        // Otherwise, select the first project as default and store it in localStorage
         const firstProjectId = projects[0]?.id;
         if (firstProjectId) {
           setProjectId(firstProjectId);
-          localStorage.setItem("projectId", firstProjectId); // Save to localStorage
+          localStorage.setItem("projectId", firstProjectId);
         }
       }
     }
-  }, [projects]); // Runs after projects are fetched
+  }, [projects]); // Runs only when the projects data is fetched or changed
 
   // Update selected project when projectId changes
   useEffect(() => {
@@ -37,12 +41,12 @@ const useProject = () => {
     }
   }, [projects, projectId]); // Re-renders when projectId or projects change
 
-  // Store projectId in localStorage
+  // Store projectId in localStorage whenever it changes
   useEffect(() => {
     if (projectId) {
       localStorage.setItem("projectId", projectId);
     }
-  }, [projectId]);
+  }, [projectId]); // Only runs when projectId changes
 
   return {
     projects: projects || [],

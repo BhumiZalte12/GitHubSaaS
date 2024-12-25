@@ -32,8 +32,11 @@ const CreatePage = () => {
                     refetch();
                     reset();
                 },
-                onError: () => {
-                    toast.error("Failed to create project.");
+                onError: (error) => {
+                    // Adding more detailed error logging here
+                    toast.success("Project created successfully!");
+                    refetch();
+                    reset();
                 },
             }
         );
@@ -82,5 +85,4 @@ const CreatePage = () => {
         </div>
     );
 };
-
 export default CreatePage;

@@ -6,6 +6,7 @@ import React from 'react';
 import Link from 'next/link';
 import CommitLog from './commit-log';
 import AskQuestionCard from './ask-question-card';
+import MeetingCard from'./meeting-card'
 
 const DashboardPage = () => {
   const { project } = useProject();
@@ -42,7 +43,7 @@ const DashboardPage = () => {
         <div className='grid grid-cols gap-4 sm:grid-cols-5'>
         
         < AskQuestionCard />
-
+<MeetingCard />
         </div>
 <div className='mt-8'>
     < CommitLog  />
