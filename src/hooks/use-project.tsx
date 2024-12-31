@@ -1,55 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { api } from "@/trpc/react";
+import { useLocalStorage } from "usehooks-ts";
 
-interface Project {
-  id: string;
-  name: string;
-  gitHubUrl: string;
-  gitHubToken?: string | null;
-}
+type Project = {
+  id: string; // Adjust this based on your actual project structure
+  name: string; // Example property
+  // Add other properties of the Project type here
+};
 
 const useProject = () => {
   const { data: projects } = api.project.getProjects.useQuery<Project[]>();
-  const [projectId, setProjectId] = useState<string | null>(null);
-  const [project, setProject] = useState<Project | null>(null);
+  const [projectId, setProjectId] = useLocalStorage<string>('dionysus-projectId', '');
 
-  // Fetch project from localStorage or set initial projectId
-  useEffect(() => {
-    // If projects are fetched and available
-    if (projects && projects.length > 0) {
-      const storedProjectId = localStorage.getItem("projectId");
-
-      // If there's a projectId stored in localStorage, use it
-      if (storedProjectId) {
-        setProjectId(storedProjectId);
-      } else {
-        // Otherwise, select the first project as default and store it in localStorage
-        const firstProjectId = projects[0]?.id;
-        if (firstProjectId) {
-          setProjectId(firstProjectId);
-          localStorage.setItem("projectId", firstProjectId);
-        }
-      }
-    }
-  }, [projects]); // Runs only when the projects data is fetched or changed
-
-  // Update selected project when projectId changes
-  useEffect(() => {
-    if (projects && projectId) {
-      const selectedProject = projects.find((p) => p.id === projectId);
-      setProject(selectedProject || null);
-    }
-  }, [projects, projectId]); // Re-renders when projectId or projects change
-
-  // Store projectId in localStorage whenever it changes
-  useEffect(() => {
-    if (projectId) {
-      localStorage.setItem("projectId", projectId);
-    }
-  }, [projectId]); // Only runs when projectId changes
+  const project = projects?.find((project: Project) => project.id === projectId);
 
   return {
-    projects: projects || [],
+    projects,
     project,
     projectId,
     setProjectId,

@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"name": "dionysus-y",
+			"path": "."
+		}
+	],
+	"settings": {
+		"CodeGPT.apiKey": "CodeGPT Plus Beta"
+	}
+}

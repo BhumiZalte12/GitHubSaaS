@@ -3,16 +3,54 @@ import { Document } from '@langchain/core/documents';
 import { summariseCode } from './gemini';
 import { generateEmbedding } from './gemini';
 import { db } from "../server/db";
+import { Octokit } from 'octokit';
+import { SourceCode } from 'eslint';
 
-// Helper function to validate the payload
-const validatePayload = (payload: any, index: number) => {
-  if (!payload || typeof payload !== "object") {
-    console.error(`Invalid payload for document at index ${index}:`, payload);
-    return false;
+
+
+const getFileCount = async (path: string , octokit: Octokit,gitHubOwner : string,GithubRepo : string,acc: number=0)=>
+  {
+    const {data} = await octokit.rest.repos.getContent({
+      owner : gitHubOwner,
+      repo : GithubRepo,
+      path 
+    })
+  if(!Array.isArray(data) && data.type === 'file'){
+    return acc + 1
   }
-  return true;
-};
-
+  
+    if(!Array.isArray(data)){
+     let fileCount = 0
+     const directories: string[] = []
+  
+     for(const item of data){
+      if(item.type==='dir'){
+        directories.push(item.path)
+      }else{
+        fileCount++
+      }
+     }
+     if(directories.length > 0){
+      const directoryCounts = await Promise.all(directories.map(dirPath => getFileCount(dirPath,octokit,gitHubOwner,GithubRepo,0)))
+      fileCount += directoryCounts.reduce((acc,count) => acc + count,0)
+     }
+     return acc + fileCount
+    }
+    return acc
+  }
+  export const checkCredits = async (gitHubUrl: string,gitHubToken?:string) =>
+  {
+    const octokit = new Octokit({ auth: gitHubToken });
+  
+    const gitHubOwner = gitHubUrl.split('/')[3]
+    const GithubRepo = gitHubUrl.split('/')[4]
+    if(!gitHubOwner || !GithubRepo){
+      return 0 
+    }
+    const fileCount = await getFileCount('',octokit,gitHubOwner,GithubRepo,0)
+    return fileCount
+    
+  }
 // Load GitHub repository
 export const loadGithubRepo = async (githubUrl: string, gitHubToken?: string) => {
   try {
@@ -20,9 +58,9 @@ export const loadGithubRepo = async (githubUrl: string, gitHubToken?: string) =>
     console.log("GitHub Token provided:", !!gitHubToken);
 
     const loader = new GithubRepoLoader(githubUrl, {
-      accessToken: gitHubToken || undefined,
+      accessToken: gitHubToken || '',
       branch: 'main',
-      ignoreFiles: ['yarn.lock', 'pnpm-lock.yaml'],
+      ignoreFiles: ['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml'],
       recursive: true,
       unknown: 'warn',
       maxConcurrency: 5,
@@ -50,84 +88,41 @@ export const loadGithubRepo = async (githubUrl: string, gitHubToken?: string) =>
 export const indexGithubRepo = async (projectId: string, gitHubUrl: string, gitHubToken?: string) => {
   try {
     const docs = await loadGithubRepo(gitHubUrl, gitHubToken);
+    const allEmbeddings = await generateEmbeddings(docs);
 
-    const allEmbeddings = await generateEmbeddings(docs, projectId);
+    await Promise.allSettled(allEmbeddings.map(async (embedding, index) => {
+      console.log(`Processing ${index + 1} of ${allEmbeddings.length}`);
+      if (!embedding) return;
 
-    const results = await Promise.allSettled(
-      allEmbeddings.map(async (embedding, index) => {
-        if (!embedding) {
-          console.warn(`Skipping empty embedding for document at index ${index}`);
-          return;
+      const sourceCodeEmbedding = await db.sourceCodeEmbedding.create({
+        data: {
+          summary: embedding.summary,
+          sourceCode: embedding.sourceCode,
+          fileName: embedding.fileName,
+          projectId,
         }
+      });
 
-        try {
-          const sourceCodeEmbedding = await db.sourceCodeEmbedding.create({
-            data: {
-              summary: embedding.summary,
-              sourceCode: embedding.sourceCode,
-              fileName: embedding.fileName,
-              projectId,
-            },
-          });
-
-          await db.$executeRaw(`
-            UPDATE "SourceCodeEmbedding"
-            SET "summaryEmbedding" = $1::vector
-            WHERE "id" = $2
-          `, [embedding.embedding, sourceCodeEmbedding.id]);
-
-          console.log(`Successfully saved embedding for document: ${embedding.fileName}`);
-        } catch (err) {
-          console.error(`Error saving embedding for document at index ${index}:`, err);
-        }
-      })
-    );
-
-    results.forEach((result, index) => {
-      if (result.status === "rejected") {
-        console.error(`Error processing document at index ${index}:`, result.reason);
-      }
-    });
-
-  } catch (error) {
-    console.error("Error indexing GitHub repository:", error);
-    throw new Error("Failed to index GitHub repository");
+      await db.$executeRaw`
+        UPDATE "SourceCodeEmbedding"
+        SET "summaryEmbedding" = ${embedding.embedding}::vector
+        WHERE "id" = ${sourceCodeEmbedding.id}`;
+    }));
+  } catch (error: any) {
+    console.error("Error indexing GitHub repository:", error.message);
+    throw new Error(`Failed to index GitHub repository: ${error.message}`);
   }
 };
 
-// Generate embeddings for the documents
-const generateEmbeddings = async (docs: Document[], projectId: string) => {
-  try {
-    return await Promise.all(
-      docs.map(async (doc, index) => {
-        // Validate payload (document)
-        if (!validatePayload(doc, index)) {
-          return null; // Skip invalid payloads
-        }
-
-        try {
-          console.log(`Processing document at index ${index}:`, doc.metadata.source);
-
-          const summary = await summariseCode(doc);
-          console.log(`Generated summary for document at index ${index}:`, summary);
-
-          const embedding = await generateEmbedding(summary);
-          console.log(`Generated embedding for document at index ${index}`);
-
-          return {
-            summary,
-            embedding,
-            sourceCode: JSON.stringify(doc.pageContent),
-            fileName: doc.metadata.source,
-          };
-        } catch (error) {
-          console.error(`Error generating embedding for document at index ${index}:`, error);
-          return null;
-        }
-      })
-    );
-  } catch (error) {
-    console.error("Error generating embeddings:", error);
-    throw new Error("Failed to generate embeddings");
-  }
+const generateEmbeddings = async (docs: Document[]) => {
+  return await Promise.all(docs.map(async doc => {
+    const summary = await summariseCode(doc);
+    const embedding = await generateEmbedding(summary);
+    return {
+      summary,
+      embedding,
+      sourceCode: JSON.parse(JSON.stringify(doc.pageContent)),
+      fileName: doc.metadata.source,
+    };
+  }));
 };

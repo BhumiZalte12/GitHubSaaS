@@ -45,20 +45,14 @@ const AuthButtons = () => {
         <p className="text-lg text-gray-600 mb-6">Choose an option to proceed:</p>
 
         <div className="space-x-4">
-          <button
-            onClick={() => handleAuth('sign-in')}
-            disabled={loading}
-            className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none"
-          >
-            {loading ? 'Signing In...' : 'Sign In'}
-          </button>
+          
 
           <button
             onClick={handleSignUpRedirect} // Redirect to the SignUp page
             disabled={loading}
             className="px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none"
           >
-            {loading ? 'Signing Up...' : 'Sign Up'}
+            {loading ? 'Signing Up...' : 'Get Started...'}
           </button>
         </div>
 
