@@ -14,6 +14,8 @@ export async function askQuestion(question: string, projectId: string) {
 
   // Generate the embedding for the question
   const queryVector = await generateEmbedding(question);
+  const vectorQuery = `[${queryVector.join(',')}]`
+
   if (queryVector.length === 0) {
     console.error("Error: Generated embedding vector is empty.");
     stream.done();
@@ -31,14 +33,14 @@ export async function askQuestion(question: string, projectId: string) {
       "fileName", 
       "sourceCode", 
       "summary",
-      1 - ("summaryEmbedding" <=> ${queryVector}::vector) AS similarity
+      1 - ("summaryEmbedding" <=> ${vectorQuery}::vector) AS similarity
     FROM "SourceCodeEmbedding"
     WHERE 
-      1 - ("summaryEmbedding" <=> ${queryVector}::vector) > 0.3
+      1 - ("summaryEmbedding" <=> ${vectorQuery}::vector) > 0.5
       AND "projectId" = ${projectId}
     ORDER BY similarity DESC
     LIMIT 10
-  ` as { fileName: string; sourceCode: string; summary: string }[] || [];
+  ` as { fileName: string; sourceCode: string; summary: string }[] 
 
   console.log("Query Result:", result);
 

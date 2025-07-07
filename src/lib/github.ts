@@ -115,7 +115,7 @@ async function fetchProjectGithubUrl(projectId: string){
     throw new Error("Project has no GitHub URL");
   }
 
-  return { project , gitHubUrl: project.gitHubUrl} 
+  return { project , gitHubUrl: project?.gitHubUrl} 
 }
 
 // Filter unprocessed commits

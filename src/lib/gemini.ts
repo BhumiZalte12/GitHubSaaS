@@ -46,8 +46,8 @@ export const aiSummariseCommit = async (diff: string): Promise<string> => {
 export async function summariseCode(doc: Document) {
   try {
     const code = doc.pageContent.slice(0, 10000); // Limit code length
+    
     const model = getGenerativeModel();
-
     const response = await model.generateContent([
       `You are an intelligent senior software engineer who specializes in onboarding junior software engineers onto projects.
       You are onboarding a junior software engineer and explaining to them the purpose of the ${doc.metadata.source} file.
@@ -73,7 +73,8 @@ export async function generateEmbedding(summary: string) {
 
   try {
     const result = await model.embedContent(summary);
-    return result.embedding.values;
+    const embedding = result.embedding
+    return embedding.values
   } catch (error) {
     console.error("Error generating embedding:", error);
     return [];

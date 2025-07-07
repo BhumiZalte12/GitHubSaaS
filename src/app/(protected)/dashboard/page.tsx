@@ -7,13 +7,16 @@ import Link from 'next/link';
 import CommitLog from './commit-log';
 import AskQuestionCard from './ask-question-card';
 import MeetingCard from'./meeting-card'
+import ArchiveButtton from "./archive-button"
+import InviteButton from './invite-button';
+import TeamMembers from './team-members';
 
 const DashboardPage = () => {
   const { project } = useProject();
 
   return (
     <div className='py-4'>
-      
+    
     <div className="flex items-center justify-between flex-wrap gap-y-4">
       <div className="w-fit rounded-md bg-primary px-4 py-3">
         <div className="flex items-center">
@@ -22,6 +25,7 @@ const DashboardPage = () => {
             {project?.gitHubUrl ? (
               <p className="text-sm font-medium text-white">
                 This project is linked to{' '}
+                
                 <Link 
                   href={project?.gitHubUrl ?? ""} 
                   className="inline-flex items-center text-white/80 hover:underline"
@@ -38,6 +42,14 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
+
+<div className='h-4'></div>
+<div className='flex items-center gap-4'>
+  < TeamMembers />
+  < InviteButton />
+  < ArchiveButtton />
+</div>
+
     </div>
     <div className='mt-4'>
         <div className='grid grid-cols gap-4 sm:grid-cols-5'>

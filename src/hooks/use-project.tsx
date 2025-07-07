@@ -13,40 +13,49 @@ const useProject = () => {
   const [projectId, setProjectId] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
 
-  // Fetch project from localStorage or set initial projectId
+  // Check and log if projects are being fetched correctly
   useEffect(() => {
-    // If projects are fetched and available
+    console.log("Projects Fetched: ", projects);
+  }, [projects]);
+
+  // Set the initial projectId from localStorage or from fetched projects after fetching the projects
+  useEffect(() => {
     if (projects && projects.length > 0) {
       const storedProjectId = localStorage.getItem("projectId");
-
-      // If there's a projectId stored in localStorage, use it
+      console.log("Stored Project ID: ", storedProjectId); // Debugging log
       if (storedProjectId) {
         setProjectId(storedProjectId);
       } else {
-        // Otherwise, select the first project as default and store it in localStorage
         const firstProjectId = projects[0]?.id;
         if (firstProjectId) {
           setProjectId(firstProjectId);
-          localStorage.setItem("projectId", firstProjectId);
+          localStorage.setItem("projectId", firstProjectId); // Save to localStorage
         }
       }
     }
-  }, [projects]); // Runs only when the projects data is fetched or changed
+  }, [projects]); // Trigger only when projects are fetched
 
-  // Update selected project when projectId changes
+  // Update the selected project when projectId or projects change
   useEffect(() => {
+    console.log("Selected Project ID in effect: ", projectId);
     if (projects && projectId) {
       const selectedProject = projects.find((p) => p.id === projectId);
       setProject(selectedProject || null);
     }
-  }, [projects, projectId]); // Re-renders when projectId or projects change
+  }, [projects, projectId]); // Ensure it runs when either projects or projectId changes
 
-  // Store projectId in localStorage whenever it changes
+  // Debugging log to verify project updates
+  useEffect(() => {
+    console.log("Selected Project ID:", projectId);
+    console.log("Selected Project:", project);
+  }, [projectId, project]);
+
+  // When the projectId changes, store it in localStorage
   useEffect(() => {
     if (projectId) {
       localStorage.setItem("projectId", projectId);
     }
-  }, [projectId]); // Only runs when projectId changes
+  }, [projectId]);
 
   return {
     projects: projects || [],
